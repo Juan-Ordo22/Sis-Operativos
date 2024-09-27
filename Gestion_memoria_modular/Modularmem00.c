@@ -26,106 +26,119 @@ Adicional, se crea un fichero que se llama Makefile cuyo proposit es el de autom
 
 #define CAPACIDAD_INICIAL 4
 
-
-/*Creación Estructura de Datos para el Vector*/
+/* Creación de la estructura de datos para el vector dinámico */
 typedef struct vectorDinamico{
-        int capacidad;
-        int totalElementos;
-        void **elementos;
+    int capacidad;         // Capacidad actual del vector
+    int totalElementos;    // Número total de elementos en el vector
+    void **elementos;      // Puntero a los elementos del vector
 } vectorDinamico;
 
-
+/* Inicializa el vector dinámico, asignando memoria y estableciendo 
+   la capacidad inicial y el conteo de elementos a cero. */
 void vectorInicio(vectorDinamico *V){
-        V->capacidad = CAPACIDAD_INICIAL;
-        V->totalElementos = 0;
-        V->elementos = malloc(sizeof(void *) * V->capacidad); 
+    V->capacidad = CAPACIDAD_INICIAL;
+    V->totalElementos = 0;
+    V->elementos = malloc(sizeof(void *) * V->capacidad); 
 }
 
+/* Retorna el total de elementos actuales en el vector. */
 int totalVector(vectorDinamico *V){
-        return V->totalElementos;
+    return V->totalElementos;
 }
 
+/* Redimensiona el vector a una nueva capacidad. Se usa realloc para ajustar el tamaño. */
 static void resizeVector(vectorDinamico *V, int capacidad){
-        printf("Redimensión: %d a %d \n", V->capacidad, capacidad);
+    printf("Redimensión: %d a %d \n", V->capacidad, capacidad);
 
-        void **elementos = realloc(V->elementos, sizeof(void *) * capacidad);
-        if(elementos){
-                V->elementos = elementos;
-                V->capacidad = capacidad;
-        }
+    void **elementos = realloc(V->elementos, sizeof(void *) * capacidad);
+    if(elementos){
+        V->elementos = elementos;
+        V->capacidad = capacidad;
+    }
 }
 
+/* Agrega un nuevo elemento al vector. Si el vector está lleno, lo redimensiona. */
 void addVector(vectorDinamico *V, void *elemento){
-        if(V->capacidad == V->totalElementos)
-                resizeVector(V, V->capacidad*2);
-        V->elementos[V->totalElementos++] = elemento;
+    if(V->capacidad == V->totalElementos)
+        resizeVector(V, V->capacidad * 2);
+    V->elementos[V->totalElementos++] = elemento;
 }
 
+/* Libera la memoria asignada para los elementos del vector. */
 void freeVector(vectorDinamico *V){
-        free(V->elementos);
+    free(V->elementos);
 }
 
+/* Obtiene un elemento del vector en un índice específico. 
+   Devuelve NULL si el índice está fuera de rango. */
 void *getVector(vectorDinamico *V, int indice){
-        if(indice >= 0 && indice < V->totalElementos)
-                return V->elementos[indice];
-        return NULL;
+    if(indice >= 0 && indice < V->totalElementos)
+        return V->elementos[indice];
+    return NULL;
 }
 
+/* Establece un nuevo valor para el elemento en un índice específico. 
+   No realiza verificación si el índice está fuera de rango. */
 void setVector(vectorDinamico *V, int indice, void *elemento){
-        if(indice >= 0 && indice < V->totalElementos)
-                V->elementos[indice]=elemento;
+    if(indice >= 0 && indice < V->totalElementos)
+        V->elementos[indice] = elemento;
 }
 
-
+/* Borra un elemento en el índice especificado, desplazando los elementos posteriores hacia la izquierda.
+   Redimensiona el vector si el total de elementos cae a 1/4 de la capacidad. */
 void borrarVector(vectorDinamico *V, int indice){
-        if(indice < 0 || indice >= V->totalElementos)
-                return; 
+    if(indice < 0 || indice >= V->totalElementos)
+        return; 
 
-        V->elementos[indice] = NULL;
+    V->elementos[indice] = NULL;
 
-        for(int i=indice; i<V->totalElementos-1; i++){
-                V->elementos[i] = V->elementos[i+1];
-                V->elementos[i+1] = NULL; 
-        }
-        V->totalElementos--;
-        if(V->totalElementos>0 && V->totalElementos == V->capacidad/4)
-                resizeVector(V, V->capacidad/2);
+    for(int i = indice; i < V->totalElementos - 1; i++){
+        V->elementos[i] = V->elementos[i + 1];
+        V->elementos[i + 1] = NULL; 
+    }
+    V->totalElementos--;
+    if(V->totalElementos > 0 && V->totalElementos == V->capacidad / 4)
+        resizeVector(V, V->capacidad / 2);
 }
  
 int main(){
-        int i;
-        vectorDinamico editor;
-        vectorInicio(&editor);
+    int i;
+    vectorDinamico editor;
+    vectorInicio(&editor); // Inicializa el vector
 
-        addVector(&editor, "Hola ");
-        addVector(&editor, "Profesional ");
-        addVector(&editor, "en ");
-        addVector(&editor, "Formación ");
-        addVector(&editor, "en ");
-        addVector(&editor, "ingenieria ");
-         
-        printf("\n \n");
+    // Agrega varios elementos al vector
+    addVector(&editor, "Hola ");
+    addVector(&editor, "Profesional ");
+    addVector(&editor, "en ");
+    addVector(&editor, "Formación ");
+    addVector(&editor, "en ");
+    addVector(&editor, "ingenieria ");
+     
+    printf("\n \n");
   
-        for (i = 0; i < totalVector(&editor); i++)
+    // Imprime los elementos actuales del vector
+    for (i = 0; i < totalVector(&editor); i++)
         printf("%s", (char *) getVector(&editor, i));
 
-        printf("\n \n");
+    printf("\n \n");
   
-       while(i > 1){
-           borrarVector(&editor, i);
-            i--;
-        }
+    // Borra elementos desde el final hasta el segundo elemento
+    while(i > 1){
+        borrarVector(&editor, i);
+        i--;
+    }
   
-        setVector(&editor, 1, "Buenos ");
-        addVector(&editor, "días  ");
+    // Establece un nuevo valor en el segundo índice y agrega un nuevo elemento
+    setVector(&editor, 1, "Buenos ");
+    addVector(&editor, "días  ");
   
-        printf("\n \n");
+    printf("\n \n");
          
-   
-        for (i = 0; i < totalVector(&editor); i++)
+    // Imprime los elementos restantes en el vector
+    for (i = 0; i < totalVector(&editor); i++)
         printf("%s ", (char *) getVector(&editor, i));
   
-      freeVector(&editor);
-     return 0;
-  }
-
+    // Libera la memoria del vector antes de salir
+    freeVector(&editor);
+    return 0;
+}
